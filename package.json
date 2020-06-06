@@ -1,0 +1,27 @@
+{
+  "name": "node_node_node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "dev": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/krupet/node_node_node.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/krupet/node_node_node/issues"
+  },
+  "homepage": "https://github.com/krupet/node_node_node#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "mongodb": "^3.5.8"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
+  }
+}
