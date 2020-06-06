@@ -14,17 +14,10 @@ app.use(bodyParser.urlencoded({extended: true}))
 MongoClient.connect('mongodb://localhost:27017/data', {useUnifiedTopology: true})
     .then(client => {
         const db = client.db('data')
-        const quotesCollection = db.collection('quotes')
+        const quotesCollection = db.collection('expressions')
 
-        app.get('/', (req, res) => {
-            res.sendFile(__dirname + '/index.html')
-        })
-
-        app.post('/quotes', (req, res) => {
+        app.post('/data', (req, res) => {
             quotesCollection.insertOne(req.body)
-                .then(result => {
-                    res.redirect('/')
-                })
                 .catch(error => console.error(error))
         })
     })
