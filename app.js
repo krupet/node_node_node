@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser')
 const MongoClient = require('mongodb').MongoClient
 const path = require('path')
+const ObjectID = require('mongodb').ObjectID;
 
 const app = express();
 const port = 8000;
@@ -31,7 +32,9 @@ MongoClient.connect('mongodb://localhost:27017/data', {useUnifiedTopology: true}
         app.get('/', (req, res) => res.sendFile(path.join(viewsDir, 'index.html')))
 
         app.post('/data', (req, res) => {
-            quotesCollection.insertOne(req.body)
+            const payload = JSON.parse(req.body.data)
+            payload._id = new ObjectID()
+            quotesCollection.insertOne(payload)
                 .then(result => { console.log("saved") })
                 .catch(error => console.error(error))
         })

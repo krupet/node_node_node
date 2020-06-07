@@ -177,11 +177,13 @@
 
     function updateResults() {}
 
+    const userId = "ololo"
+
     function postResults(timestamp, expressions) {
         const payload = {}
-        payload["user_id"] = "ololo"
-        payload["ts"] = timestamp
-        payload["expressions"] = JSON.stringify(expressions)
+        payload.user_id = userId
+        payload.ts = timestamp
+        payload.expressions = expressions?.expressions
 
         $.post("http://localhost:8000/data", {
             type: "POST",
