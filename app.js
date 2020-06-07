@@ -35,15 +35,72 @@ MongoClient.connect('mongodb://localhost:27017/data', {useUnifiedTopology: true}
             const payload = JSON.parse(req.body.data)
             payload._id = new ObjectID()
             quotesCollection.insertOne(payload)
-                .then(result => { console.log("saved") })
+                .then(result => {
+                    console.log("saved")
+                })
                 .catch(error => console.error(error))
         })
 
-        app.get('/quotes', (req, res) => {
-            db.collection('quotes').find().toArray()
+        app.get('/analytics', (req, res) => {
+            db.collection('expressions').find().toArray()
                 .then(results => {
-                    res.render('analitics.ejs', {quotes: results})
+                    const chartData = {
+                        neutral: 0.0,
+                        happy: 0.0,
+                        sad: 0.0,
+                        angry: 0.0,
+                        fearful: 0.0,
+                        disgusted: 0.0,
+                        surprised: 0.0
+                    }
+                    const expressions = results.map(a => a.expressions)
+
+                    for (let i = 0; i < expressions.length; i++) {
+
+                        const expression = expressions[i]
+
+                        chartData.neutral = (parseFloat(chartData.neutral) + parseFloat(expression.neutral)).toFixed(3)
+                        chartData.happy = (parseFloat(chartData.happy) + parseFloat(expression.happy)).toFixed(3)
+                        chartData.sad = (parseFloat(chartData.sad) + parseFloat(expression.sad)).toFixed(3)
+                        chartData.angry = (parseFloat(chartData.angry) + parseFloat(expression.angry)).toFixed(3)
+                        chartData.fearful = (parseFloat(chartData.fearful) + parseFloat(expression.fearful)).toFixed(3)
+                        chartData.disgusted = (parseFloat(chartData.disgusted) + parseFloat(expression.disgusted)).toFixed(3)
+                        chartData.surprised = (parseFloat(chartData.surprised) + parseFloat(expression.surprised)).toFixed(3)
+                    }
+
+                    res.render('analitics.ejs', {pieData: chartData})
                 })
                 .catch(error => console.error(error))
+        })
+
+        app.get('/pieData', (req, res) => {
+            db.collection('expressions').find().toArray()
+                .then(results => {
+                    const chartData = {
+                        neutral: 0.0,
+                        happy: 0.0,
+                        sad: 0.0,
+                        angry: 0.0,
+                        fearful: 0.0,
+                        disgusted: 0.0,
+                        surprised: 0.0
+                    }
+                    const expressions = results.map(a => a.expressions)
+
+                    for (let i = 0; i < expressions.length; i++) {
+
+                        const expression = expressions[i]
+
+                        chartData.neutral = (parseFloat(chartData.neutral) + parseFloat(expression.neutral)).toFixed(3)
+                        chartData.happy = (parseFloat(chartData.happy) + parseFloat(expression.happy)).toFixed(3)
+                        chartData.sad = (parseFloat(chartData.sad) + parseFloat(expression.sad)).toFixed(3)
+                        chartData.angry = (parseFloat(chartData.angry) + parseFloat(expression.angry)).toFixed(3)
+                        chartData.fearful = (parseFloat(chartData.fearful) + parseFloat(expression.fearful)).toFixed(3)
+                        chartData.disgusted = (parseFloat(chartData.disgusted) + parseFloat(expression.disgusted)).toFixed(3)
+                        chartData.surprised = (parseFloat(chartData.surprised) + parseFloat(expression.surprised)).toFixed(3)
+                    }
+
+                    res.send(JSON.stringify(chartData))
+                }).catch(error => console.error(error))
         })
     })
