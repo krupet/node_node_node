@@ -6,8 +6,10 @@ const path = require('path')
 const app = express();
 const port = 8000;
 
+app.set('view engine', 'ejs')
+
 app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
+app.use(express.urlencoded({extended: true}))
 
 const viewsDir = path.join(__dirname, 'views')
 app.use(express.static(viewsDir))
@@ -31,6 +33,14 @@ MongoClient.connect('mongodb://localhost:27017/data', {useUnifiedTopology: true}
         app.post('/data', (req, res) => {
             quotesCollection.insertOne(req.body)
                 .then(result => { console.log("saved") })
+                .catch(error => console.error(error))
+        })
+
+        app.get('/quotes', (req, res) => {
+            db.collection('quotes').find().toArray()
+                .then(results => {
+                    res.render('analitics.ejs', {quotes: results})
+                })
                 .catch(error => console.error(error))
         })
     })
