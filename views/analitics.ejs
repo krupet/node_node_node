@@ -2,46 +2,159 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8"/>
     <title>Star Wars Quote App</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
 </head>
 
 <body>
-<h1>Result analytics</h1>
 
-<canvas id="oilChart" width="600" height="400"></canvas>
+<div class="container-fluid">
+
+    <h1 class="m-4 text-center">Result analytics</h1>
+    <div class="row">
+        <div class="col-1"></div>
+        <div class="col-4">
+            <canvas id="lineChart"></canvas>
+        </div>
+        <div class="col-2"></div>
+        <div class="col-4">
+            <canvas id="pieChart"></canvas>
+        </div>
+        <div class="col-1"></div>
+    </div>
+</div>
+
 
 </body>
 
 <script>
-    var oilCanvas = document.getElementById("oilChart");
+    var pieCanvas = document.getElementById("pieChart");
 
     Chart.defaults.global.defaultFontFamily = "Lato";
     Chart.defaults.global.defaultFontSize = 18;
 
-    var oilData = {
+    const colorPalete = ["#FF6384", "#63FF84", "#84FF63", "#8463FF", "#8463AF", "#84635F", "#6384FF"]
+
+    var pieData = {
         labels: <%- JSON.stringify(Object.keys(pieData)) %>,
         datasets: [
             {
                 data: <%- JSON.stringify(Object.values(pieData)) %>,
-                backgroundColor: [
-                    "#FF6384",
-                    "#63FF84",
-                    "#84FF63",
-                    "#8463FF",
-                    "#8463AF",
-                    "#84635F",
-                    "#6384FF"
-                ]
+                backgroundColor: colorPalete
             }]
     };
 
-    console.log(<%- JSON.stringify(Object.values(pieData)) %>)
-
-    var pieChart = new Chart(oilCanvas, {
+    var pieChart = new Chart(pieCanvas, {
         type: 'pie',
-        data: oilData
+        data: pieData,
+        options: {
+            title: {
+                display: true,
+                text: 'Detected emotions summary'
+            }
+        }
+    });
+
+
+    var ctx = document.getElementById("lineChart").getContext('2d');
+
+    var myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: <%- JSON.stringify(lineData.labels) %>,
+            datasets: [
+                {
+                    label: 'Neutral',
+                    data: <%- JSON.stringify(lineData.neutral) %>,
+                    fill: false,
+                    borderColor: colorPalete[0],
+                    backgroundColor: colorPalete[0],
+                    borderWidth: 1
+                },
+                {
+                    label: 'Happy',
+                    data: <%- JSON.stringify(lineData.happy) %>,
+                    fill: false,
+                    borderColor: colorPalete[1],
+                    backgroundColor: colorPalete[1],
+                    borderWidth: 1
+                },
+                {
+                    label: 'Sad',
+                    data: <%- JSON.stringify(lineData.sad) %>,
+                    fill: false,
+                    borderColor: colorPalete[2],
+                    backgroundColor: colorPalete[2],
+                    borderWidth: 1
+                },
+                {
+                    label: 'Angry',
+                    data: <%- JSON.stringify(lineData.angry) %>,
+                    fill: false,
+                    borderColor: colorPalete[3],
+                    backgroundColor: colorPalete[3],
+                    borderWidth: 1
+                },
+                {
+                    label: 'Fearful',
+                    data: <%- JSON.stringify(lineData.fearful) %>,
+                    fill: false,
+                    borderColor: colorPalete[4],
+                    backgroundColor: colorPalete[4],
+                    borderWidth: 1
+                },
+                {
+                    label: 'Disgusted',
+                    data: <%- JSON.stringify(lineData.disgusted) %>,
+                    fill: false,
+                    borderColor: colorPalete[4],
+                    backgroundColor: colorPalete[4],
+                    borderWidth: 1
+                },
+                {
+                    label: 'Surprised',
+                    data: <%- JSON.stringify(lineData.surprised) %>,
+                    fill: false,
+                    borderColor: colorPalete[5],
+                    backgroundColor: colorPalete[5],
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true, // Instruct chart js to respond nicely.
+            maintainAspectRatio: false, // Add to prevent default behaviour of full-width/height
+            title: {
+                display: true,
+                text: 'Distribution of emotions over time period'
+            },
+            scales: {
+                xAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Time stamp'
+                    },
+                }],
+                yAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Detected emotion index'
+                    },
+                    ticks: {
+                        min: 0,
+                        max: 1,
+                        stepSize: 100
+                    }
+                }]
+            }
+        }
     });
 </script>
 </html>

@@ -8,6 +8,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.css">
     <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+    <!--    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">-->
+    <!--    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>-->
+    <!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>-->
+    <!--    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>-->
 </head>
 <body>
 <div id="navbar"></div>
@@ -16,9 +20,14 @@
     <div class="progress" id="loader">
         <div class="indeterminate"></div>
     </div>
+
+    <div>
+        <button onclick="stopVideo()" class="btn btn-primary">Stop video</button>
+    </div>
+
     <div style="position: relative" class="margin">
         <video onloadedmetadata="onPlay(this)" id="inputVideo" autoplay muted playsinline></video>
-        <canvas id="overlay" />
+        <canvas id="overlay"/>
     </div>
 
     <div class="row side-by-side">
@@ -35,21 +44,10 @@
 
         <!-- check boxes -->
         <div class="row" style="width: 220px;">
-            <input type="checkbox" id="hideBoundingBoxesCheckbox" onchange="onChangeHideBoundingBoxes(event)" />
+            <input type="checkbox" id="hideBoundingBoxesCheckbox" onchange="onChangeHideBoundingBoxes(event)"/>
             <label for="hideBoundingBoxesCheckbox">Hide Bounding Boxes</label>
         </div>
         <!-- check boxes -->
-
-        <!-- fps_meter -->
-        <div id="fps_meter" class="row side-by-side">
-            <div>
-                <label for="time">Time:</label>
-                <input disabled value="-" id="time" type="text" class="bold">
-                <label for="fps">Estimated Fps:</label>
-                <input disabled value="-" id="fps" type="text" class="bold">
-            </div>
-        </div>
-        <!-- fps_meter -->
 
     </div>
 
@@ -113,22 +111,27 @@
     </span>
     <!-- tiny_face_detector_controls -->
 
+    <div>
+        <a href="http://localhost:8000/sendMeToTheAnalytics" class="btn btn-primary">Go to Analytics</a>
+    </div>
+
+
 </body>
 
 <script>
     let forwardTimes = []
     let withBoxes = true
 
+    function stopVideo() {
+        const videoEl = $('#inputVideo').get(0)
+        videoEl.pause()
+    }
+
     function onChangeHideBoundingBoxes(e) {
         withBoxes = !$(e.target).prop('checked')
     }
 
-    function updateTimeStats(timeInMs) {
-        forwardTimes = [timeInMs].concat(forwardTimes).slice(0, 30)
-        const avgTimeInMs = forwardTimes.reduce((total, t) => total + t) / forwardTimes.length
-        $('#time').val(`${Math.round(avgTimeInMs)} ms`)
-        $('#fps').val(`${faceapi.utils.round(1000 / avgTimeInMs)}`)
-    }
+    const oneSecondTimeout = 1000
 
     async function onPlay() {
         const videoEl = $('#inputVideo').get(0)
@@ -143,8 +146,6 @@
 
         const result = await faceapi.detectSingleFace(videoEl, options).withFaceExpressions()
 
-        updateTimeStats(Date.now() - ts)
-
         if (result) {
             const canvas = $('#overlay').get(0)
             const dims = faceapi.matchDimensions(canvas, videoEl, true)
@@ -157,9 +158,9 @@
             faceapi.draw.drawFaceExpressions(canvas, resizedResult, minConfidence)
         }
 
-        postResults(ts, result)
+        await postResults(ts, result)
 
-        setTimeout(() => onPlay())
+        setTimeout(() => onPlay(), oneSecondTimeout)
     }
 
     async function run() {
@@ -170,16 +171,17 @@
 
         // try to access users webcam and stream the images
         // to the video element
-        const stream = await navigator.mediaDevices.getUserMedia({ video: {} })
+        const stream = await navigator.mediaDevices.getUserMedia({video: {}})
         const videoEl = $('#inputVideo').get(0)
         videoEl.srcObject = stream
     }
 
-    function updateResults() {}
+    function updateResults() {
+    }
 
     const userId = "ololo"
 
-    function postResults(timestamp, expressions) {
+    async function postResults(timestamp, expressions) {
         const payload = {}
         payload.user_id = userId
         payload.ts = timestamp
@@ -189,11 +191,11 @@
             type: "POST",
             dataType: 'json',
             async: false,
-            data:JSON.stringify(payload)
+            data: JSON.stringify(payload)
         })
     }
 
-    $(document).ready(function() {
+    $(document).ready(function () {
         initFaceDetectionControls()
         run()
     })
